@@ -1,18 +1,6 @@
 <% 
-
 transactions = Transaction.all
 users = User.all
-
-# for transaction in transactions
-#   if transaction[:from_user] == "ben"
-#     balance_ben = balance_ben - blockchain[:amount]
-#   elsif blockchain[:from_user] == "brian"
-#     balance_brian = balance_brian - blockchain[:amount]
-#   elsif blockchain[:from_user] == "evan"
-#     balance_evan = balance_evan - blockchain[:amount]
-#   elsif blockchain[:from_user] == "anthony"
-#     balance_anthony = balance_anthony - blockchain[:amount]
-#   end
 %>
 
 <h1>KelloggCoin Ledger</h1>
@@ -21,14 +9,30 @@ users = User.all
 
 <ol>
 <%for transaction in transactions %>
-    <% sender = User.find_by(transaction.from_user_id).name %>
-    <% receiver = User.find_by(transaction.to_user_id).name %>
-        <li> <%= transaction["amount"]%> from <%= sender["name"]%> to <%= receiver["name"]%> </li>
-
+    <% sender = User.find_by({"id" => transaction["from_user_id"]}) %>
+    <% receiver = User.find_by({"id" => transaction["to_user_id"]}) %>
+        <li>
+        <% if sender != nil %>
+            <%= transaction["amount"]%> from <%= sender["name"]%> to <%= receiver["name"]%>
+        <% else %>
+            Initial Coin offering: <%= transaction["amount"] %> to <%= receiver["name"]%>
+        <% end %>
+        </li>
 <% end %>
-    
 </ol>
 <!-- Step 2: Calculate and display the balances -->
+
+
+<ul>
+    <% for user in users%>
+        <%
+        balance = 0
+        balance = balance + Transaction.where({ "to_user_id" => user["id"] }).sum("amount")
+        balance = balance - Transaction.where({ "from_user_id" => user["id"] }).sum("amount")
+        %>
+        <li>Balance for <%= user["name"] %>: <%= balance %> Kellogg Coins</li>
+    <% end %>
+</ul>
 
 <!-- 
 Expected balances:
